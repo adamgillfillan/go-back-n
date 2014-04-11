@@ -2,6 +2,7 @@ import socket  # Import socket module
 import sys
 from struct import *
 from collections import namedtuple
+import pickle
 import os
 
 DATA_TYPE = 0b0101010101010101
@@ -16,7 +17,9 @@ def calculate_checksum(message):
 
 def pack_data(message, seq_num):
     pkt = data_pkt(seq_num, calculate_checksum(message), DATA_TYPE, message)
-    packed_pkt = pack('ihh' + str(DATA_SIZE) + 's', pkt.seq_num, pkt.checksum, pkt.data_type, bytes(pkt.data,'utf-8'))
+    #packed_pkt = pack('ihh' + str(DATA_SIZE) + 's', pkt.seq_num, pkt.checksum, pkt.data_type, bytes(pkt.data,'utf-8'))
+    my_list = [pkt.seq_num, pkt.checksum, pkt.data_type, pkt.data]
+    packed_pkt = pickle.dumps(my_list)
     return packed_pkt
 
 

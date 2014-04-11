@@ -1,6 +1,7 @@
 import socket               # Import socket module
 import sys
 from struct import *
+import pickle
 from collections import namedtuple
 
 PKT_SIZE = 1024
@@ -22,13 +23,17 @@ def main():
     s.listen(5)                 # Now wait for client connection.
 
     c, addr = s.accept()     # Establish connection with client.
-    print ('Got connection from', addr)
+    print('Got connection from', addr)
         #c.send('Thank you for connecting')
     while True:
         pkt_recv, add = c.recvfrom(PKT_SIZE)
-        seq_num, checksum, data_type, message = unpack('ihh' + str(DATA_SIZE) + 's', pkt_recv)
+        #seq_num, checksum, data_type, message = unpack('ihh' + str(DATA_SIZE) + 's', pkt_recv)
+        my_new_list = pickle.loads(pkt_recv)
+        seq_num, checksum, data_type, message = my_new_list[0], my_new_list[1], my_new_list[2], my_new_list[3]
+
         print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
-        c.close()                # Close the connection
+
+    c.close()                # Close the connection
 
 if __name__ == "__main__":
     main()
