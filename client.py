@@ -5,7 +5,7 @@ from collections import namedtuple
 import pickle
 import os
 
-DATA_TYPE = 0b0101010101010101
+DATA_TYPE = 0b101010101010101
 DATA_SIZE = 64   #need to be modified
 
 data_pkt = namedtuple('data_pkt', 'seq_num checksum data_type data')
@@ -30,13 +30,16 @@ def prepare_pkts(file_content):
     return pkts_to_send
     #your code here
 
-def send_file(file_content, sock, hport):
+
+#def send_file(file_content, sock, hport):
+def send_file(file_content, sock):
     num_pkts_sent = 0
     pkts = prepare_pkts(file_content)
     print(file_content)
 
     while num_pkts_sent < len(pkts):
-        sock.sendto(pkts[num_pkts_sent], hport)
+        #sock.send(pkts[num_pkts_sent], hport)
+        sock.send(pkts[num_pkts_sent])
         num_pkts_sent += 1
     #your code here
 
@@ -57,8 +60,8 @@ def main():
     except:
         sys.exit("Failed to open file!")
 
-
-    send_file(file_content,s, (host, port))
+    #send_file(file_content,s, (host, port))
+    send_file(file_content, s)
     s.close()  # Close the socket when done
 
 

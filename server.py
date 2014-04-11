@@ -7,7 +7,7 @@ from collections import namedtuple
 PKT_SIZE = 1024
 DATA_SIZE = 64
 ZERO_FIELD = 0
-ACK_TYPE = 0b1010101010101010
+ACK_TYPE = 1010101010101010
 
 data_pkt = namedtuple('data_pkt', 'seq_num checksum data_type data')
 ack_pkt = namedtuple('ack_pkt','seq_num zero_field data_type')
@@ -26,11 +26,12 @@ def main():
     print('Got connection from', addr)
         #c.send('Thank you for connecting')
     while True:
-        pkt_recv, add = c.recvfrom(PKT_SIZE)
+        #pkt_recv, add = c.recvfrom(PKT_SIZE)
         #seq_num, checksum, data_type, message = unpack('ihh' + str(DATA_SIZE) + 's', pkt_recv)
-        my_new_list = pickle.loads(pkt_recv)
-        seq_num, checksum, data_type, message = my_new_list[0], my_new_list[1], my_new_list[2], my_new_list[3]
-
+        data = pickle.loads(c.recv(PKT_SIZE))
+        seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
+        print("Data: ", data)
+        #print(data[0])
         print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
 
     c.close()                # Close the connection
