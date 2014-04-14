@@ -14,11 +14,11 @@ ack_pkt = namedtuple('ack_pkt', 'seq_num zero_field data_type')
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     host = socket.gethostname()  # Get local machine name
-    port = 12345                 # Reserve a port for your service.
+    port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
 
     while True:
-        data, addr = s.recvfrom(PKT_SIZE)
+        data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
         print("Data: ", data)
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
