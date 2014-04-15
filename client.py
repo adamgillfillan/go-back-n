@@ -26,9 +26,20 @@ host = socket.gethostname()
 ack_port_num = 62223
 ack_socket.bind((host, ack_port_num))
 
+
+# Carry bit used in one's combliment
+def carry_checksum_addition(num_1, num_2):
+    c = num_1 + num_2
+    return (c & 0xffff) + (c >> 16)
+
+
+# Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
     checksum = 0
-    return checksum
+    for i in range(0, len(message), 2):
+        w = ord(message[i]) + (ord(message[i+1]) << 8)
+        checksum = carry_checksum_addition(checksum, w)
+    return (not checksum) & 0xffff
 
 
 def pack_data(message, seq_num):
@@ -63,10 +74,10 @@ def send_file(file_content, sock, hostname, port):
         data = pickle.loads(ack_socket.recv(1024))
         print(data[0])
     #deal with the sliding window
-    while num_pkts_sent< total_pkts:
+    while num_pkts_sent < total_pkts:
         global ACK
         ACK = data[0]  # ack_seq
-        print (ACK)
+        print(ACK)
         global window_low
         global window_high
         global num_pkts_acked
@@ -81,7 +92,7 @@ def send_file(file_content, sock, hostname, port):
                         sock.sendto(pkts[num_pkts_sent], (hostname, port))
                         num_pkts_sent += 1
                         data = pickle.loads(ack_socket.recv(1024))
-                        print (data[0])
+                        print(data[0])
 
     # while num_pkts_sent < int(N):
     #     sock.sendto(pkts[num_pkts_sent], (hostname, port))
@@ -117,8 +128,6 @@ def send_file(file_content, sock, hostname, port):
 #     # # add something to listen ACK from server.
 #
 #
-
-
 
 
 def main():
