@@ -77,7 +77,7 @@ def send_file(file_content, sock, hostname, port):
     while num_pkts_sent < total_pkts:
         global ACK
         ACK = data[0]  # ack_seq
-        print(ACK)
+        #print(ACK)
         global window_low
         global window_high
         global num_pkts_acked
@@ -91,11 +91,11 @@ def send_file(file_content, sock, hostname, port):
                 # print ("window_high+ "+ str(window_high))
                 if window_high < total_pkts: # Still have packages to be sent. Foo
                     for i in range(min(temp_pckts_acked, total_pkts - window_high-1)): # check how many pkts left to sent. Foo
-                        print(num_pkts_sent)
+                        #print(num_pkts_sent)
                         sock.sendto(pkts[num_pkts_sent], (hostname, port))
                         num_pkts_sent += 1
                         data = pickle.loads(ack_socket.recv(1024))
-                        #print(data[0])
+                        print(data[0])
 
     # while num_pkts_sent < int(N):
     #     sock.sendto(pkts[num_pkts_sent], (hostname, port))
@@ -146,7 +146,7 @@ def main():
 
     try:
         test_file = open('test_file.txt', 'r')
-        file_content =[]
+        file_content = []
         while True:
             chunk = test_file.read(int(MSS))  # Read the file MSS bytes each time Foo
             file_content.append(chunk)
