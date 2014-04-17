@@ -60,8 +60,10 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.3
+    prob_loss = 0.0001
     output_file = 'test_output.txt'
+    lost_seq_num = 0
+    packet_lost = False
     while True:
         data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
@@ -70,15 +72,28 @@ def main():
         rand_loss = random.random()
         if rand_loss <= prob_loss:
             print("Packet loss, sequence number = ", seq_num)
+            lost_seq_num = seq_num
+            packet_lost = True
         else:
             if checksum != calculate_checksum(message):
                 print("Packet dropped, checksum doesn't match!")
-            else:
+            #else:
+            elif not packet_lost:
+                #if lost_seq_num
                 ack_seq = int(seq_num)+1
                 print(ack_seq)
                 send_ack(ack_seq)
                 with open(output_file, 'a') as file:
                     file.write(message)
+            else:
+                if packet_lost and lost_seq_num == seq_num:
+                    print(ack_seq)
+                    send_ack(ack_seq)
+                    with open(output_file, 'a') as file:
+                        file.write(message)
+                else:
+                    pass
+
         #print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
 
 if __name__ == "__main__":

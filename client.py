@@ -22,7 +22,7 @@ seq_num = 0
 window_low = 0
 window_high = int(N)-1
 total_pkts = 0
-RTT = 5
+RTT = .1
 pkts = []
 
 
