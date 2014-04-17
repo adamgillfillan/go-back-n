@@ -65,7 +65,7 @@ def main():
     while True:
         data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
-        #print("Data: ", data)
+        # print("Data: ", data)
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
         rand_loss = random.random()
         if rand_loss <= prob_loss:
