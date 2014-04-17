@@ -4,6 +4,7 @@ from collections import namedtuple
 import pickle
 from _thread import *
 import threading
+import time
 
 DATA_TYPE = 0b101010101010101
 DATA_SIZE = 64   #need to be modified
@@ -21,6 +22,9 @@ seq_num = 0
 window_low = 0
 window_high = int(N)-1
 total_pkts = 0
+RTT = 5
+pkts = []
+
 
 ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Foo
 host = socket.gethostname()
@@ -64,6 +68,7 @@ def prepare_pkts(file_content, seq_num):
     #your code here
 
 def socket_function(pkts):
+    #print (pkts)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
 
     # comment this block when ready for command line argument
@@ -75,6 +80,23 @@ def socket_function(pkts):
     s.sendto(pkts, (host, port))
     s.close()
 
+def timer():
+    global pkts
+    global window_low
+    global window_high
+    global total_pkts
+    global ACK
+    t = threading.Timer(RTT, timer)
+    t.start()
+    resent_index = window_low  # resent from window_low to window_high
+    if ACK == window_low:
+        print ("resent begin")
+        while resent_index <= window_high and resent_index < total_pkts:
+            print ("resent "+ str(resent_index))
+            socket_function(pkts[resent_index])
+            resent_index += 1
+        print("=========")
+
 def send_file(file_content, sock, hostname, port):
     global total_pkts
     total_pkts = len(file_content)
@@ -85,6 +107,7 @@ def send_file(file_content, sock, hostname, port):
     #send the first window
     while num_pkts_sent < int(N):
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
+        #t = threading.Timer(RTT,socket_function("hello"))
         socket_function(pkts[num_pkts_sent])
         num_pkts_sent += 1
         #data = pickle.loads(ack_socket.recv(1024))
@@ -189,6 +212,8 @@ def main():
     my_test_file = 'test_file.txt'
     # finish comment here
 
+    global window_high
+    window_high =  int(N)-1
     try:
         test_file = open(my_test_file, 'r')
         file_content = []
@@ -203,6 +228,7 @@ def main():
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
+    timer()
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
     threading.Thread(target=send_file, args=(file_content, s, host, port)).start()
     s.close()  # Close the socket when done

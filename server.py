@@ -60,7 +60,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.0001
+    prob_loss = 0.3
     output_file = 'test_output.txt'
     while True:
         data, addr = s.recvfrom(1000000)
