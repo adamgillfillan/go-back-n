@@ -1,5 +1,6 @@
 import socket               # Import socket module
 import pickle
+import sys
 from collections import namedtuple
 import random
 
@@ -15,14 +16,17 @@ ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a
 host = socket.gethostname()  # Get local machine name
 port = 62223                 # Reserve a port for your service.
 #ack_socket.bind((host, port))         # Bind to the port
-def send_ack(seq_num, ss):
+
+
+def send_ack(seq_num):
     # ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     # host = socket.gethostname()  # Get local machine name
     # port = 62223                 # Reserve a port for your service.
     # #ack_socket.bind((host, port))         # Bind to the port
-    reply_message = [seq_num, "0000000000000000","1010101010101010"]
-    print (reply_message)
+    reply_message = [seq_num, "0000000000000000", "1010101010101010"]
+    print(reply_message)
     ack_socket.sendto(pickle.dumps(reply_message), (host, port))
+
 
 # Carry bit used in one's combliment
 def carry_checksum_addition(num_1, num_2):
@@ -42,13 +46,21 @@ def calculate_checksum(message):
     return (not checksum) & 0xffff
 
 
+def parse_command_line_arguments():
+    port = sys.argv[1]
+    file_name = sys.argv[2]
+    prob = sys.argv[3]
+
+    return int(port), file_name, float(prob)
+
+
 def main():
+    port, output_file, prob_loss = parse_command_line_arguments()
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     host = socket.gethostname()  # Get local machine name
-    port = 7735                 # Reserve a port for your service.
+    #port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
 
-    prob_loss = 0.000001
     while True:
         data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
@@ -63,14 +75,10 @@ def main():
             else:
                 ack_seq = int(seq_num)+1
                 print(ack_seq)
-                send_ack(ack_seq, "1")
-                with open('test_output.txt', 'a') as output_file:
-                    output_file.write(message)
-            #print("Please write message to a file")
-            #print(message, file="test1.txt")
+                send_ack(ack_seq)
+                with open(output_file, 'a') as file:
+                    file.write(message)
         #print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
-        #if True: # should be CHecksum !!! replace !! Foo
-
 
 if __name__ == "__main__":
     main()

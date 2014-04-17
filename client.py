@@ -136,19 +136,36 @@ def send_file(file_content, sock, hostname, port):
 #
 
 
+def parse_command_line_arguments():
+    host = sys.argv[1]
+    port = sys.argv[2]
+    file_name = sys.argv[3]
+    my_window_size = sys.argv[4]
+    my_mss = sys.argv[5]
+
+    return host, int(port), file_name, int(my_window_size), int(my_mss)
+
+
 def main():
     global N
-    N = input("Please enter window size N:>")
-   # N = 5
     global MSS
-    #MSS = 5
-    MSS = input("Please enter MSS in Bytes:>")
+
+    # Uncomment this when ready for command line argument
+    #host, port, my_test_file, N, MSS = parse_command_line_arguments()
+    #adam's host = lil_boss
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
+
+    # comment this block when ready for command line argument
+    N = input("Please enter window size N:>")
+    MSS = input("Please enter MSS in Bytes:>")
     host = socket.gethostname()  # Get local machine name
+    print("Host:", host)
     port = 7735  # Reserve a port for your service.
+    my_test_file = 'test_file.txt'
+    # finish comment here
 
     try:
-        test_file = open('test_file.txt', 'r')
+        test_file = open(my_test_file, 'r')
         file_content = []
         while True:
             chunk = test_file.read(int(MSS))  # Read the file MSS bytes each time Foo
