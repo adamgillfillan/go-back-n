@@ -35,6 +35,9 @@ def carry_checksum_addition(num_1, num_2):
 
 # Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
+    if (len(message) % 2) != 0:
+        message += "0"
+
     checksum = 0
     for i in range(0, len(message), 2):
         w = ord(message[i]) + (ord(message[i+1]) << 8)

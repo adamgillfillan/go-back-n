@@ -24,6 +24,24 @@ def send_ack(seq_num, ss):
     print (reply_message)
     ack_socket.sendto(pickle.dumps(reply_message), (host, port))
 
+# Carry bit used in one's combliment
+def carry_checksum_addition(num_1, num_2):
+    c = num_1 + num_2
+    return (c & 0xffff) + (c >> 16)
+
+
+# Calculate the checksum of the data only. Return True or False
+def calculate_checksum(message):
+    if (len(message) % 2) != 0:
+        message += "0"
+
+    checksum = 0
+    for i in range(0, len(message), 2):
+        w = ord(message[i]) + (ord(message[i+1]) << 8)
+        checksum = carry_checksum_addition(checksum, w)
+    return (not checksum) & 0xffff
+
+
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     host = socket.gethostname()  # Get local machine name
@@ -35,6 +53,12 @@ def main():
         data = pickle.loads(data)
         print("Data: ", data)
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
+        new_checksum = calculate_checksum(message)
+        if new_checksum == checksum:
+            with open('test_output.txt', 'a') as output_file:
+                output_file.write(message)
+            #print("Please write message to a file")
+            #print(message, file="test1.txt")
         #print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
         #if True: # should be CHecksum !!! replace !! Foo
         ack_seq = int(seq_num)+1
