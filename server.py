@@ -1,7 +1,7 @@
 import socket               # Import socket module
 import pickle
 from collections import namedtuple
-from _thread import *
+import random
 
 PKT_SIZE = 1024
 DATA_SIZE = 64
@@ -48,24 +48,29 @@ def main():
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
 
+    prob_loss = 0.000001
     while True:
         data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
         print("Data: ", data)
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
-        new_checksum = calculate_checksum(message)
-        if new_checksum == checksum:
-            with open('test_output.txt', 'a') as output_file:
-                output_file.write(message)
+        rand_loss = random.random()
+        if rand_loss <= prob_loss:
+            print("Packet loss, sequence number = ", seq_num)
+        else:
+            if checksum != calculate_checksum(message):
+                print("Packet dropped, checksum doesn't match!")
+            else:
+                ack_seq = int(seq_num)+1
+                print(ack_seq)
+                send_ack(ack_seq, "1")
+                with open('test_output.txt', 'a') as output_file:
+                    output_file.write(message)
             #print("Please write message to a file")
             #print(message, file="test1.txt")
         #print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
         #if True: # should be CHecksum !!! replace !! Foo
-        ack_seq = int(seq_num)+1
-        print(ack_seq)
-        #start_new_thread(send_ack,(ack_seq,"1"))
-        send_ack(ack_seq,"1")
-        #send_ack(ack_seq)
+
 
 if __name__ == "__main__":
     main()
