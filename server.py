@@ -55,16 +55,17 @@ def parse_command_line_arguments():
 
 
 def main():
-    port, output_file, prob_loss = parse_command_line_arguments()
+    #port, output_file, prob_loss = parse_command_line_arguments()
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     host = socket.gethostname()  # Get local machine name
-    #port = 7735                 # Reserve a port for your service.
+    port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-
+    prob_loss = 0.0001
+    output_file = 'test_output.txt'
     while True:
         data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
-        print("Data: ", data)
+        #print("Data: ", data)
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
         rand_loss = random.random()
         if rand_loss <= prob_loss:
