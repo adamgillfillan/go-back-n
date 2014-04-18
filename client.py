@@ -2,8 +2,9 @@ import socket  # Import socket module
 import sys
 from collections import namedtuple
 import pickle
-from _thread import *
+#from _thread import *
 import threading
+import inspect
 import time
 
 DATA_TYPE = 0b101010101010101

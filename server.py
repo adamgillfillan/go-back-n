@@ -60,7 +60,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.05
+    prob_loss = 0.1
     output_file = 'test_output.txt'
     lost_seq_num = []
     packet_lost = False
@@ -89,14 +89,19 @@ def main():
                 with open(output_file, 'a') as file:
                     file.write(message)
             else:
-                if packet_lost and (seq_num == lost_seq_num[0]):
-                    packet_lost = False
+                print("print meeeeeeeee")
+                print("Seq_num: ", seq_num)
+                print("lost_seq_num: ", lost_seq_num)
+                if packet_lost and (seq_num == min(lost_seq_num)):
+                    print("my_ack--------")
                     ack_seq = int(seq_num)+1
                     print("ACK "+ str(ack_seq))
                     send_ack(ack_seq)
                     lost_seq_num.remove(seq_num)
                     with open(output_file, 'a') as file:
                         file.write(message)
+                    if len(lost_seq_num) < 1:
+                        packet_lost = False
                 else:
                     pass
 
