@@ -61,7 +61,7 @@ def main():
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
     prob_loss = 0.1
-    output_file = 'test_output.txt'
+    output_file = 'test.pdf'
     lost_seq_num = []
     packet_lost = False
     while True:
@@ -86,7 +86,7 @@ def main():
                 ack_seq = int(seq_num)+1
                 print("ACK "+ str(ack_seq))
                 send_ack(ack_seq)
-                with open(output_file, 'a') as file:
+                with open(output_file, 'ab') as file:
                     file.write(message)
             else:
                 print("print meeeeeeeee")

@@ -241,13 +241,13 @@ def main():
     host = socket.gethostname()  # Get local machine name
     print("Host:", host)
     port = 7735  # Reserve a port for your service.
-    my_test_file = 'test_file.txt'
+    my_test_file = 'test.pdf'
     # finish comment here
 
     global window_high
     window_high =  int(N)-1
     try:
-        test_file = open(my_test_file, 'r')
+        test_file = open(my_test_file, 'rb')
         file_content = []
         while True:
             chunk = test_file.read(int(MSS))  # Read the file MSS bytes each time Foo
