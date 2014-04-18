@@ -24,6 +24,7 @@ window_high = int(N)-1
 total_pkts = 0
 RTT = .1
 pkts = []
+done_transmitting = 0
 #global threading_first_window
 
 ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Foo
@@ -89,14 +90,19 @@ def timer():
     t = threading.Timer(RTT, timer)
     t.start()
     resent_index = window_low  # resent from window_low to window_high
-    if ACK == window_low :
+    if ACK == window_low:
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
             socket_function(pkts[resent_index])
             resent_index += 1
-        # print("=========")
 
+        # print("=========")
+    if done_transmitting == 1:
+            print("helllllo")
+            t._stop()
+            #t._delete()
+            #exit()
 def send_file(file_content, sock, hostname, port):
     global total_pkts
     total_pkts = len(file_content)
@@ -156,6 +162,8 @@ def ack_listen_thread(sock, host, port):
     global num_pkts_acked
     global total_pkts
     global ACK
+    global done_transmitting
+    done_transmitting = 0
     #global threading_first_window
     while True:
         #threading_first_window.stop()
@@ -194,6 +202,7 @@ def ack_listen_thread(sock, host, port):
 
                 elif ACK == total_pkts:
                     print("Done!")
+                    done_transmitting = 1
                     exit()
 
 
@@ -247,7 +256,7 @@ def main():
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
-    #timer()
+    timer()
     send_file(file_content, s, host, port)
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
     #global threading_first_window
