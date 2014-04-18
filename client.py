@@ -24,7 +24,7 @@ window_high = int(N)-1
 total_pkts = 0
 RTT = .1
 pkts = []
-
+#global threading_first_window
 
 ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Foo
 host = socket.gethostname()
@@ -106,13 +106,17 @@ def send_file(file_content, sock, hostname, port):
     pkts= prepare_pkts(file_content, seq_num)
     global num_pkts_sent
     #send the first window
-    while num_pkts_sent < int(N):
+    current_max_window = int(N)
+    while num_pkts_sent < current_max_window:
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
-        socket_function(pkts[num_pkts_sent])
-        print("pakage "+str(num_pkts_sent)+"sent from first")
-        #print(pkts[num_pkts_sent])
-        num_pkts_sent += 1
+        if ACK == 0:
+            socket_function(pkts[num_pkts_sent])
+            print("pakage "+str(num_pkts_sent)+"sent from first")
+            #print(pkts[num_pkts_sent])
+            num_pkts_sent += 1
+        else:
+            break
         #data = pickle.loads(ack_socket.recv(1024))
         #print(data[0])
     #deal with the sliding window
@@ -152,7 +156,9 @@ def ack_listen_thread(sock, host, port):
     global num_pkts_acked
     global total_pkts
     global ACK
+    #global threading_first_window
     while True:
+        #threading_first_window.stop()
         data = pickle.loads(ack_socket.recv(256))
         print("ACK "+str(data[0]))
         # print("Wind_low "+str(window_low))
@@ -161,7 +167,7 @@ def ack_listen_thread(sock, host, port):
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
             ACK = data[0]
             #print (ACK)
-            if ACK and ACK >= int(N):  # if ACK != null. Foo
+            if ACK: #and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
                 if ACK >= window_low and num_pkts_sent < total_pkts:
                     #print(window_low)
@@ -235,13 +241,14 @@ def main():
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
     #timer()
+    send_file(file_content, s, host, port)
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
-    #send_file(file_content, s, host, port)
-    threading.Thread(target=send_file, args=(file_content, s, host, port)).start()
+    #global threading_first_window
+    #threading_first_window = threading.Thread(target=send_file, args=(file_content, s, host, port))
+    #threading_first_window.start()
     s.close()  # Close the socket when done
 
 
 if __name__ == "__main__":
     main()
-
 
