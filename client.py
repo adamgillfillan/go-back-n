@@ -32,6 +32,7 @@ host = socket.gethostname()
 ack_port_num = 62223
 ack_socket.bind((host, ack_port_num))
 
+lock = threading.RLock()  # for lock sth
 
 # Carry bit used in one's combliment
 def carry_checksum_addition(num_1, num_2):
@@ -91,12 +92,13 @@ def timer():
     t.start()
     resent_index = window_low  # resent from window_low to window_high
     if ACK == window_low:
+        lock.acquire()
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
             socket_function(pkts[resent_index])
             resent_index += 1
-
+        lock.release()
         # print("=========")
     if done_transmitting == 1:
             t.cancel()
@@ -178,6 +180,7 @@ def ack_listen_thread(sock, host, port):
             #print (ACK)
             if ACK: #and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
+                lock.acquire()
                 if ACK > window_low and ACK <total_pkts:
                     #print(window_low)
                     temp_pckts_acked = ACK - window_low
@@ -203,6 +206,7 @@ def ack_listen_thread(sock, host, port):
                     print("Done!")
                     done_transmitting = 1
                     exit()
+                lock.release()
 
 
 
