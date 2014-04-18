@@ -65,8 +65,9 @@ def main():
     s.bind((host, port))         # Bind to the port
     prob_loss = 0.000
     #dt = str(datetime.time().second)
-    d = random.randrange(0, 1000000)
-    output_file = 'file_'+str(d)+'.pdf'
+    #d = random.randrange(0, 1000000)
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    output_file = 'file_'+str(timestr)+'.pdf'
     lost_seq_num = []
     packet_lost = False
     while True:
