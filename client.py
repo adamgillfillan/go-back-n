@@ -89,7 +89,7 @@ def timer():
     t = threading.Timer(RTT, timer)
     t.start()
     resent_index = window_low  # resent from window_low to window_high
-    if ACK == window_low and (ACK != total_pkts-1):
+    if ACK == window_low :
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
@@ -161,7 +161,9 @@ def ack_listen_thread(sock, host, port):
         #threading_first_window.stop()
         data = pickle.loads(ack_socket.recv(256))
         print("ACK "+str(data[0]))
-        # print("Wind_low "+str(window_low))
+        print("Wind_low "+str(window_low))
+        print("WInd_high"+str(window_high))
+        print("num_pkts_sent "+str(num_pkts_sent))
         #print("total"+str(total_pkts))
         # print("sent"+str(num_pkts_sent))
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
@@ -169,19 +171,20 @@ def ack_listen_thread(sock, host, port):
             #print (ACK)
             if ACK: #and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
-                if ACK >= window_low and num_pkts_sent < total_pkts:
+                if ACK > window_low and ACK <=total_pkts:
                     #print(window_low)
                     temp_pckts_acked = ACK - window_low
-                    window_high = window_high + ACK - window_low
+                    window_high = min(window_high + ACK - window_low, total_pkts-1)
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
                     if window_high <= total_pkts:  # Still have packages to be sent. Foo
-                        for i in range(min(temp_pckts_acked, total_pkts - window_high-1)): # check how many pkts left to sent. Foo
+                        for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
                             socket_function(pkts[num_pkts_sent])
                             print("pakage "+str(num_pkts_sent)+"sent")
                             #print( pkts[num_pkts_sent])
-                            num_pkts_sent += 1
+                            if num_pkts_sent < total_pkts-1:
+                                num_pkts_sent += 1
                 elif ACK <total_pkts:
                      continue  # for the last windows.
 
@@ -240,7 +243,7 @@ def main():
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
-    timer()
+    #timer()
     send_file(file_content, s, host, port)
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
     #global threading_first_window
