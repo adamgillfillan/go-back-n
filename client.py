@@ -22,7 +22,7 @@ seq_num = 0
 window_low = 0
 window_high = int(N)-1
 total_pkts = 0
-RTT = .1
+RTT = 2
 pkts = []
 done_transmitting = 0
 #global threading_first_window

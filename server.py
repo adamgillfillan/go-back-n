@@ -60,7 +60,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.1
+    prob_loss = 0.05
     output_file = 'test_output.txt'
     lost_seq_num = []
     packet_lost = False
