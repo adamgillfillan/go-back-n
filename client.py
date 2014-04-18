@@ -48,7 +48,8 @@ def calculate_checksum(message):
 
     checksum = 0
     for i in range(0, len(message), 2):
-        w = ord(message[i]) + (ord(message[i+1]) << 8)
+        my_message = str(message)
+        w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
         checksum = carry_checksum_addition(checksum, w)
     return (not checksum) & 0xffff
 
@@ -245,18 +246,20 @@ def main():
     # finish comment here
 
     global window_high
-    window_high =  int(N)-1
+    window_high = int(N)-1
     try:
-        test_file = open(my_test_file, 'rb')
         file_content = []
-        while True:
-            chunk = test_file.read(int(MSS))  # Read the file MSS bytes each time Foo
-            file_content.append(chunk)
-            #print(chunk)
-            if not chunk:
-                break
+        #test_file = open(my_test_file, 'rb')
+
+        with open(my_test_file, 'rb') as f:
+            while True:
+                chunk = f.read(int(MSS))  # Read the file MSS bytes each time Foo
+                if chunk:
+                    file_content.append(chunk)
+                else:
+                    break
         #print(file_content)
-        test_file.close()
+        #test_file.close()
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))

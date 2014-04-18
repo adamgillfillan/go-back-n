@@ -41,7 +41,8 @@ def calculate_checksum(message):
 
     checksum = 0
     for i in range(0, len(message), 2):
-        w = ord(message[i]) + (ord(message[i+1]) << 8)
+        my_message = str(message)
+        w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
         checksum = carry_checksum_addition(checksum, w)
     return (not checksum) & 0xffff
 
@@ -61,7 +62,7 @@ def main():
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
     prob_loss = 0.1
-    output_file = 'test.pdf'
+    output_file = 'test2.pdf'
     lost_seq_num = []
     packet_lost = False
     while True:
@@ -98,7 +99,7 @@ def main():
                     print("ACK "+ str(ack_seq))
                     send_ack(ack_seq)
                     lost_seq_num.remove(seq_num)
-                    with open(output_file, 'a') as file:
+                    with open(output_file, 'ab') as file:
                         file.write(message)
                     if len(lost_seq_num) < 1:
                         packet_lost = False
