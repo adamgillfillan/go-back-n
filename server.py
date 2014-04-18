@@ -60,9 +60,9 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0
+    prob_loss = 0.1
     output_file = 'test_output.txt'
-    lost_seq_num = 0
+    lost_seq_num = []
     packet_lost = False
     while True:
 
@@ -73,8 +73,9 @@ def main():
         rand_loss = random.random()
         if rand_loss <= prob_loss:
             print("Packet loss, sequence number = ", seq_num)
-            lost_seq_num = seq_num
             packet_lost = True
+            if seq_num not in lost_seq_num:
+                lost_seq_num.append(seq_num)
         else:
             if checksum != calculate_checksum(message):
                 print("Packet dropped, checksum doesn't match!")
@@ -88,11 +89,12 @@ def main():
                 with open(output_file, 'a') as file:
                     file.write(message)
             else:
-                if packet_lost and lost_seq_num == seq_num:
+                if packet_lost and (seq_num == lost_seq_num[0]):
                     packet_lost = False
                     ack_seq = int(seq_num)+1
                     print("ACK "+ str(ack_seq))
                     send_ack(ack_seq)
+                    lost_seq_num.remove(seq_num)
                     with open(output_file, 'a') as file:
                         file.write(message)
                 else:

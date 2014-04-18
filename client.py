@@ -99,8 +99,7 @@ def timer():
 
         # print("=========")
     if done_transmitting == 1:
-            print("helllllo")
-            t._stop()
+            t.cancel()
             #t._delete()
             #exit()
 def send_file(file_content, sock, hostname, port):
@@ -186,9 +185,9 @@ def ack_listen_thread(sock, host, port):
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
                     #print("ACK "+str(data[0]))
-                    print("Wind_low "+str(window_low))
-                    print("WInd_high"+str(window_high))
-                    print("num_pkts_sent "+str(num_pkts_sent))
+                    #print("Wind_low "+str(window_low))
+                    #print("WInd_high"+str(window_high))
+                    #print("num_pkts_sent "+str(num_pkts_sent))
                     if window_high <= total_pkts and int(total_pkts-ACK)>=int(N):  # Still have packages to be sent. Foo
                         for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
