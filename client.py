@@ -89,7 +89,7 @@ def timer():
     t = threading.Timer(RTT, timer)
     t.start()
     resent_index = window_low  # resent from window_low to window_high
-    if ACK == window_low:
+    if ACK == window_low and (ACK != total_pkts-1):
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
@@ -240,7 +240,7 @@ def main():
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
-    #timer()
+    timer()
     send_file(file_content, s, host, port)
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
     #global threading_first_window
