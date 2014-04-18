@@ -44,7 +44,7 @@ def carry_checksum_addition(num_1, num_2):
 # Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
     if (len(message) % 2) != 0:
-        message += "0"
+        message += bytes("0")
 
     checksum = 0
     for i in range(0, len(message), 2):
@@ -70,6 +70,7 @@ def prepare_pkts(file_content, seq_num):
         seq_num += 1
     return pkts_to_send
     #your code here
+
 
 def socket_function(pkts):
     #print (pkts)
@@ -113,6 +114,7 @@ def send_file(file_content, sock, hostname, port):
     global pkts
     global seq_num
     pkts= prepare_pkts(file_content, seq_num)
+    timer()
     global num_pkts_sent
     #send the first window
     current_max_window = int(N)
@@ -263,7 +265,7 @@ def main():
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
-    timer()
+    #timer()
     send_file(file_content, s, host, port)
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
     #global threading_first_window

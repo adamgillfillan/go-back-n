@@ -3,6 +3,8 @@ import pickle
 import sys
 from collections import namedtuple
 import random
+import time
+import datetime
 
 PKT_SIZE = 1024
 DATA_SIZE = 64
@@ -37,7 +39,7 @@ def carry_checksum_addition(num_1, num_2):
 # Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
     if (len(message) % 2) != 0:
-        message += "0"
+        message += bytes("0")
 
     checksum = 0
     for i in range(0, len(message), 2):
@@ -61,8 +63,10 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.1
-    output_file = 'test2.pdf'
+    prob_loss = 0.000
+    #dt = str(datetime.time().second)
+    d = random.randrange(0, 1000000)
+    output_file = 'file_'+str(d)+'.pdf'
     lost_seq_num = []
     packet_lost = False
     while True:
