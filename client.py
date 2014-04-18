@@ -102,6 +102,7 @@ def send_file(file_content, sock, hostname, port):
     total_pkts = len(file_content)
     #print(total_pkts)
     global pkts
+    global seq_num
     pkts= prepare_pkts(file_content, seq_num)
     global num_pkts_sent
     #send the first window
@@ -109,7 +110,8 @@ def send_file(file_content, sock, hostname, port):
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
         socket_function(pkts[num_pkts_sent])
-        print("pakage "+str(num_pkts_sent)+"sent")
+        print("pakage "+str(num_pkts_sent)+"sent from first")
+        #print(pkts[num_pkts_sent])
         num_pkts_sent += 1
         #data = pickle.loads(ack_socket.recv(1024))
         #print(data[0])
@@ -149,17 +151,17 @@ def ack_listen_thread(sock, host, port):
     global num_pkts_sent
     global num_pkts_acked
     global total_pkts
+    global ACK
     while True:
         data = pickle.loads(ack_socket.recv(256))
-        # print("ACK "+str(data[0]))
+        print("ACK "+str(data[0]))
         # print("Wind_low "+str(window_low))
-        # print("total"+str(total_pkts))
+        #print("total"+str(total_pkts))
         # print("sent"+str(num_pkts_sent))
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
-            global ACK
             ACK = data[0]
             #print (ACK)
-            if ACK:  # if ACK != null. Foo
+            if ACK and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
                 if ACK >= window_low and num_pkts_sent < total_pkts:
                     #print(window_low)
@@ -167,15 +169,17 @@ def ack_listen_thread(sock, host, port):
                     window_high = window_high + ACK - window_low
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
-                    if window_high < total_pkts :  # Still have packages to be sent. Foo
+                    if window_high <= total_pkts:  # Still have packages to be sent. Foo
                         for i in range(min(temp_pckts_acked, total_pkts - window_high-1)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
                             socket_function(pkts[num_pkts_sent])
                             print("pakage "+str(num_pkts_sent)+"sent")
+                            #print( pkts[num_pkts_sent])
                             num_pkts_sent += 1
                 elif ACK <total_pkts:
                      continue  # for the last windows.
-                else:
+
+                elif ACK == total_pkts:
                     print("Done!")
                     exit()
 
@@ -230,8 +234,9 @@ def main():
     except:
         sys.exit("Failed to open file!")
     # start_new_thread(ack_listen_thread, (s, host, port))
-    timer()
+    #timer()
     threading.Thread(target=ack_listen_thread, args=(s, host, port)).start()
+    #send_file(file_content, s, host, port)
     threading.Thread(target=send_file, args=(file_content, s, host, port)).start()
     s.close()  # Close the socket when done
 
