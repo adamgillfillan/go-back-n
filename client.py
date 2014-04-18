@@ -161,9 +161,9 @@ def ack_listen_thread(sock, host, port):
         #threading_first_window.stop()
         data = pickle.loads(ack_socket.recv(256))
         print("ACK "+str(data[0]))
-        print("Wind_low "+str(window_low))
-        print("WInd_high"+str(window_high))
-        print("num_pkts_sent "+str(num_pkts_sent))
+        # print("Wind_low "+str(window_low))
+        # print("WInd_high"+str(window_high))
+        # print("num_pkts_sent "+str(num_pkts_sent))
         #print("total"+str(total_pkts))
         # print("sent"+str(num_pkts_sent))
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
@@ -171,13 +171,17 @@ def ack_listen_thread(sock, host, port):
             #print (ACK)
             if ACK: #and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
-                if ACK > window_low and ACK <=total_pkts:
+                if ACK > window_low and ACK <total_pkts:
                     #print(window_low)
                     temp_pckts_acked = ACK - window_low
                     window_high = min(window_high + ACK - window_low, total_pkts-1)
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
-                    if window_high <= total_pkts:  # Still have packages to be sent. Foo
+                    #print("ACK "+str(data[0]))
+                    print("Wind_low "+str(window_low))
+                    print("WInd_high"+str(window_high))
+                    print("num_pkts_sent "+str(num_pkts_sent))
+                    if window_high <= total_pkts and int(total_pkts-ACK)>=int(N):  # Still have packages to be sent. Foo
                         for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
                             socket_function(pkts[num_pkts_sent])
