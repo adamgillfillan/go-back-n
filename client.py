@@ -90,12 +90,12 @@ def timer():
     t.start()
     resent_index = window_low  # resent from window_low to window_high
     if ACK == window_low:
-        print ("resent begin")
+        # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
             socket_function(pkts[resent_index])
             resent_index += 1
-        print("=========")
+        # print("=========")
 
 def send_file(file_content, sock, hostname, port):
     global total_pkts
@@ -109,6 +109,7 @@ def send_file(file_content, sock, hostname, port):
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
         socket_function(pkts[num_pkts_sent])
+        print("pakage "+str(num_pkts_sent)+"sent")
         num_pkts_sent += 1
         #data = pickle.loads(ack_socket.recv(1024))
         #print(data[0])
@@ -150,10 +151,10 @@ def ack_listen_thread(sock, host, port):
     global total_pkts
     while True:
         data = pickle.loads(ack_socket.recv(256))
-        print("ACK "+str(data[0]))
-        print("Wind_low "+str(window_low))
-        print("total"+str(total_pkts))
-        print("sent"+str(num_pkts_sent))
+        # print("ACK "+str(data[0]))
+        # print("Wind_low "+str(window_low))
+        # print("total"+str(total_pkts))
+        # print("sent"+str(num_pkts_sent))
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
             global ACK
             ACK = data[0]
@@ -170,6 +171,7 @@ def ack_listen_thread(sock, host, port):
                         for i in range(min(temp_pckts_acked, total_pkts - window_high-1)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
                             socket_function(pkts[num_pkts_sent])
+                            print("pakage "+str(num_pkts_sent)+"sent")
                             num_pkts_sent += 1
                 elif ACK <total_pkts:
                      continue  # for the last windows.

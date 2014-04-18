@@ -24,7 +24,7 @@ def send_ack(seq_num):
     # port = 62223                 # Reserve a port for your service.
     # #ack_socket.bind((host, port))         # Bind to the port
     reply_message = [seq_num, "0000000000000000", "1010101010101010"]
-    print(reply_message)
+    # print(reply_message)
     ack_socket.sendto(pickle.dumps(reply_message), (host, port))
 
 
@@ -60,7 +60,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.0001
+    prob_loss = 0
     output_file = 'test_output.txt'
     lost_seq_num = 0
     packet_lost = False
@@ -81,13 +81,15 @@ def main():
             elif not packet_lost:
                 #if lost_seq_num
                 ack_seq = int(seq_num)+1
-                print(ack_seq)
+                print("ACK "+ str(ack_seq))
                 send_ack(ack_seq)
                 with open(output_file, 'a') as file:
                     file.write(message)
             else:
                 if packet_lost and lost_seq_num == seq_num:
-                    print(ack_seq)
+                    packet_lost = False
+                    ack_seq = int(seq_num)+1
+                    print("ACK "+ str(ack_seq))
                     send_ack(ack_seq)
                     with open(output_file, 'a') as file:
                         file.write(message)
