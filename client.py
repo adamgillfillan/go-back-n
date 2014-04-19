@@ -216,8 +216,14 @@ def ack_listen_thread(sock, host, port):
                             #print( pkts[num_pkts_sent])
                             if num_pkts_sent < total_pkts-1:
                                 num_pkts_sent += 1
-                elif ACK <total_pkts:
-                     continue  # for the last windows.
+                elif ACK < total_pkts: # for the last windows.
+                    # while num_pkts_sent < total_pkts:
+                    #     signal.alarm(int(RTT))
+                    #     socket_function(pkts[num_pkts_sent])
+                    #     print("pakage "+str(num_pkts_sent)+"sent from first")
+                    #     #print(pkts[num_pkts_sent])
+                    #     num_pkts_sent += 1
+                        continue  # for the last windows.
 
                 elif ACK == total_pkts:
                     print("Done!")
