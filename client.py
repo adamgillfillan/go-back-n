@@ -208,27 +208,35 @@ def ack_listen_thread(sock, host, port):
                     print("WInd_high"+str(window_high))
                     print("num_pkts_sent "+str(num_pkts_sent))
                     if window_high <= total_pkts and int(total_pkts-ACK)>=int(N):  # Still have packages to be sent. Foo
+                        print("state A")
                         for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
                             signal.alarm(int(RTT))
                             socket_function(pkts[num_pkts_sent])
                             print("pakage "+str(num_pkts_sent)+"sent")
+                            print ("state B")
                             #print( pkts[num_pkts_sent])
                             if num_pkts_sent < total_pkts-1:
                                 num_pkts_sent += 1
-                elif ACK < total_pkts: # for the last windows.
-                    # while num_pkts_sent < total_pkts:
-                    #     signal.alarm(int(RTT))
-                    #     socket_function(pkts[num_pkts_sent])
-                    #     print("pakage "+str(num_pkts_sent)+"sent from first")
-                    #     #print(pkts[num_pkts_sent])
-                    #     num_pkts_sent += 1
-                        continue  # for the last windows.
 
-                elif ACK == total_pkts:
-                    print("Done!")
-                    done_transmitting = 1
-                    exit()
+                    elif ACK < total_pkts: # for the last windows.
+                         print("state1")
+                         while num_pkts_sent <total_pkts: # check how many pkts left to sent. Foo
+                                #sock.sendto(pkts[8], (host, port))
+                                print("state2")
+                                signal.alarm(int(RTT))
+                                socket_function(pkts[num_pkts_sent])
+                                print("pakage "+str(num_pkts_sent)+"sent")
+                                #print( pkts[num_pkts_sent])
+                                # if num_pkts_sent < total_pkts-1:
+                                #     print("state3")
+                                num_pkts_sent += 1
+                            # continue  # for the last windows.
+
+                    elif ACK == total_pkts:
+                        print("Done!")
+                        done_transmitting = 1
+                        exit()
                 lock.release()
 
 
