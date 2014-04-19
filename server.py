@@ -63,7 +63,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.000
+    prob_loss = 0.01
     #dt = str(datetime.time().second)
     #d = random.randrange(0, 1000000)
     timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -80,8 +80,11 @@ def main():
         if rand_loss <= prob_loss:
             print("Packet loss, sequence number = ", seq_num)
             packet_lost = True
-            if seq_num not in lost_seq_num:
+            if len(lost_seq_num) == 0:
                 lost_seq_num.append(seq_num)
+            if len(lost_seq_num) > 0:
+                if seq_num not in lost_seq_num and (seq_num>min(lost_seq_num)):
+                    lost_seq_num.append(seq_num)
         else:
             if checksum != calculate_checksum(message):
                 print("Packet dropped, checksum doesn't match!")

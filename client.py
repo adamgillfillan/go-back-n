@@ -6,6 +6,7 @@ import pickle
 import threading
 import inspect
 import time
+import signal
 
 DATA_TYPE = 0b101010101010101
 DATA_SIZE = 64   #need to be modified
@@ -23,10 +24,16 @@ seq_num = 0
 window_low = 0
 window_high = int(N)-1
 total_pkts = 0
-RTT = 2
+RTT = 1
 pkts = []
 done_transmitting = 0
+# def timer():
+#     pass
+# t = threading.Thread(RTT, timer)
 #global threading_first_window
+
+
+
 
 ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Foo
 host = socket.gethostname()
@@ -85,14 +92,14 @@ def socket_function(pkts):
     s.sendto(pkts, (host, port))
     s.close()
 
-def timer():
+def timer(s,f):
     global pkts
     global window_low
     global window_high
     global total_pkts
     global ACK
-    t = threading.Timer(RTT, timer)
-    t.start()
+    #t = threading.Timer(RTT, timer)
+    #t.start()
     resent_index = window_low  # resent from window_low to window_high
     if ACK == window_low:
         lock.acquire()
@@ -103,25 +110,29 @@ def timer():
             resent_index += 1
         lock.release()
         # print("=========")
-    if done_transmitting == 1:
-            t.cancel()
+    #if done_transmitting == 1:
+            #t.cancel()
             #t._delete()
             #exit()
+
+
 def send_file(file_content, sock, hostname, port):
     global total_pkts
     total_pkts = len(file_content)
     #print(total_pkts)
     global pkts
     global seq_num
+    global RTT
     pkts= prepare_pkts(file_content, seq_num)
-    timer()
     global num_pkts_sent
     #send the first window
     current_max_window = int(N)
+    signal.alarm(int(RTT))
     while num_pkts_sent < current_max_window:
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
         if ACK == 0:
+
             socket_function(pkts[num_pkts_sent])
             print("pakage "+str(num_pkts_sent)+"sent from first")
             #print(pkts[num_pkts_sent])
@@ -177,13 +188,14 @@ def ack_listen_thread(sock, host, port):
         # print("Wind_low "+str(window_low))
         # print("WInd_high"+str(window_high))
         # print("num_pkts_sent "+str(num_pkts_sent))
-        #print("total"+str(total_pkts))
+        print("total"+str(total_pkts))
         # print("sent"+str(num_pkts_sent))
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
             ACK = data[0]
             #print (ACK)
             if ACK: #and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
+                signal.alarm(0)
                 lock.acquire()
                 if ACK > window_low and ACK <total_pkts:
                     #print(window_low)
@@ -192,12 +204,13 @@ def ack_listen_thread(sock, host, port):
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
                     #print("ACK "+str(data[0]))
-                    #print("Wind_low "+str(window_low))
-                    #print("WInd_high"+str(window_high))
-                    #print("num_pkts_sent "+str(num_pkts_sent))
+                    print("Wind_low "+str(window_low))
+                    print("WInd_high"+str(window_high))
+                    print("num_pkts_sent "+str(num_pkts_sent))
                     if window_high <= total_pkts and int(total_pkts-ACK)>=int(N):  # Still have packages to be sent. Foo
                         for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
                             #sock.sendto(pkts[8], (host, port))
+                            signal.alarm(int(RTT))
                             socket_function(pkts[num_pkts_sent])
                             print("pakage "+str(num_pkts_sent)+"sent")
                             #print( pkts[num_pkts_sent])
@@ -249,6 +262,7 @@ def main():
 
     global window_high
     window_high = int(N)-1
+    signal.signal(signal.SIGALRM, timer)
     try:
         file_content = []
         #test_file = open(my_test_file, 'rb')
