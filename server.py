@@ -15,7 +15,7 @@ data_pkt = namedtuple('data_pkt', 'seq_num checksum data_type data')
 ack_pkt = namedtuple('ack_pkt', 'seq_num zero_field data_type')
 
 ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
-host = socket.gethostname()  # Get local machine name
+host = "10.139.56.116"  # Get local machine name
 port = 62223                 # Reserve a port for your service.
 #ack_socket.bind((host, port))         # Bind to the port
 
@@ -58,19 +58,18 @@ def parse_command_line_arguments():
 
 
 def main():
-    #port, output_file, prob_loss = parse_command_line_arguments()
+    port, output_file, prob_loss = parse_command_line_arguments()
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     host = socket.gethostname()  # Get local machine name
-    port = 7735                 # Reserve a port for your service.
+    #port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.1
+    #prob_loss = 0.1
     #dt = str(datetime.time().second)
     #d = random.randrange(0, 1000000)
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    output_file = 'file_'+str(timestr)+'.pdf'
+    #timestr = time.strftime("%Y%m%d-%H%M%S")
+    #output_file = 'file_'+str(timestr)+'.pdf'
     lost_seq_num = []
     print_message = []
-    packet_lost = False
     exp_seq_num = 0
     while True:
 
@@ -78,12 +77,11 @@ def main():
         data = pickle.loads(data)
 
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
-        print("Data: ", str(message))
+        #print("Data: ", str(message))
         rand_loss = random.random()
 
         if rand_loss <= prob_loss:
             print("Packet loss, sequence number = ", seq_num)
-            packet_lost = True
             if len(lost_seq_num) == 0:
                 lost_seq_num.append(seq_num)
             if len(lost_seq_num) > 0:
@@ -94,9 +92,9 @@ def main():
                 print("Packet dropped, checksum doesn't match!")
             #else:
             if seq_num == exp_seq_num:
-                print (seq_num)
+                #print (seq_num)
                 ack_seq = int(seq_num)+1
-                print("ACK "+ str(ack_seq))
+                #print("ACK "+ str(ack_seq))
                 send_ack(ack_seq)
                 print_message.append(seq_num)
                 with open(output_file, 'ab') as file:
