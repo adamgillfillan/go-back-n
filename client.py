@@ -16,6 +16,7 @@ ack_pkt = namedtuple('ack_pkt', 'seq_num zero_field data_type')
 N = 0  # window size
 MSS = 0 # maximum segment size
 ACK = 0 # ACK received from server.
+host = 0
 num_pkts_sent = 0
 num_pkts_acked = 0
 seq_num = 0
@@ -84,10 +85,11 @@ def socket_function(pkts):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
 
     # comment this block when ready for command line argument
-    # N = input("Please enter window size N:>")
-    # MSS = input("Please enter MSS in Bytes:>")
-    host = socket.gethostname()  # Get local machine name
+    #N = input("Please enter window size N:>")
+    #MSS = input("Please enter MSS in Bytes:>")
+    #host = socket.gethostname()  # Get local machine name
     # print("Host:", host)
+    global host
     port = 7735  # Reserve a port for your service.
     s.sendto(pkts, (host, port))
     s.close()
@@ -283,19 +285,19 @@ def parse_command_line_arguments():
 def main():
     global N
     global MSS
-
+    global host
     # Uncomment this when ready for command line argument
-    #host, port, my_test_file, N, MSS = parse_command_line_arguments()
+    host, port, my_test_file, N, MSS = parse_command_line_arguments()
     #adam's host = lil_boss
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
 
     # comment this block when ready for command line argument
-    N = input("Please enter window size N:>")
-    MSS = input("Please enter MSS in Bytes:>")
-    host = socket.gethostname()  # Get local machine name
+    #N = input("Please enter window size N:>")
+    #MSS = input("Please enter MSS in Bytes:>")
+    #host = socket.gethostname()  # Get local machine name
     print("Host:", host)
-    port = 7735  # Reserve a port for your service.
-    my_test_file = 'test.pdf'
+    #port = 7735  # Reserve a port for your service.
+    #my_test_file = 'test.pdf'
     # finish comment here
 
     global window_high

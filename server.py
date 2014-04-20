@@ -132,9 +132,9 @@ def main():
         #             print("I don't this seq_num"+str(seq_num))
         #             print("I don't this lost_seq_num",lost_seq_num)
         #             pass
-        if str(ack_seq) == "1455":
-            for element in print_message:
-                print(print_message[element])
+        # if str(ack_seq) == "1455":
+        #     for element in print_message:
+        #         print(print_message[element])
 
         #print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
 
