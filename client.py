@@ -133,14 +133,14 @@ def send_file(file_content, sock, hostname, port):
     pkts= prepare_pkts(file_content, seq_num)
     global num_pkts_sent
     #send the first window
-    current_max_window = int(N)
+    current_max_window = min(int(N), int(total_pkts))
     #signal.alarm(int(RTT))
     signal.setitimer(signal.ITIMER_REAL, RTT)
-    while num_pkts_sent < current_max_window:
+    while num_pkts_sent < current_max_window :
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
         if ACK == 0:
-
+            print ("num_pkts_sent"+ str(num_pkts_sent))
             socket_function(pkts[num_pkts_sent])
             print("pakage "+str(num_pkts_sent)+"sent from first")
             #print(pkts[num_pkts_sent])
