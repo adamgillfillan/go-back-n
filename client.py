@@ -24,7 +24,7 @@ seq_num = 0
 window_low = 0
 window_high = int(N)-1
 total_pkts = 0
-RTT = 1
+RTT = 0.1
 pkts = []
 done_transmitting = 0
 # def timer():
@@ -109,8 +109,10 @@ def timer(s,f):
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
+            # signal.alarm(0)
+            # signal.alarm(int(RTT))
             signal.alarm(0)
-            signal.alarm(int(RTT))
+            signal.setitimer(signal.ITIMER_REAL, RTT)
             socket_function(pkts[resent_index])
             resent_index += 1
         lock.release()
@@ -132,7 +134,8 @@ def send_file(file_content, sock, hostname, port):
     global num_pkts_sent
     #send the first window
     current_max_window = int(N)
-    signal.alarm(int(RTT))
+    #signal.alarm(int(RTT))
+    signal.setitimer(signal.ITIMER_REAL, RTT)
     while num_pkts_sent < current_max_window:
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
@@ -204,7 +207,8 @@ def ack_listen_thread(sock, host, port):
                 lock.acquire()
                 if ACK >= window_low and ACK <total_pkts:
                     signal.alarm(0)
-                    signal.alarm(int(RTT))
+                    #signal.alarm(int(RTT))
+                    signal.setitimer(signal.ITIMER_REAL, RTT)
                     #print(window_low)
                     temp_pckts_acked = ACK - window_low
                     old_window_high = window_high

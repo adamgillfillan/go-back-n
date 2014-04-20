@@ -63,7 +63,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.005
+    prob_loss = 0.1
     #dt = str(datetime.time().second)
     #d = random.randrange(0, 1000000)
     timestr = time.strftime("%Y%m%d-%H%M%S")
