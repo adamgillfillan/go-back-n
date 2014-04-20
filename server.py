@@ -63,13 +63,15 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.01
+    prob_loss = 0.005
     #dt = str(datetime.time().second)
     #d = random.randrange(0, 1000000)
     timestr = time.strftime("%Y%m%d-%H%M%S")
     output_file = 'file_'+str(timestr)+'.pdf'
     lost_seq_num = []
+    print_message = []
     packet_lost = False
+    exp_seq_num = 0
     while True:
 
         data, addr = s.recvfrom(1000000)
@@ -78,6 +80,7 @@ def main():
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
         print("Data: ", str(message))
         rand_loss = random.random()
+
         if rand_loss <= prob_loss:
             print("Packet loss, sequence number = ", seq_num)
             packet_lost = True
@@ -90,30 +93,48 @@ def main():
             if checksum != calculate_checksum(message):
                 print("Packet dropped, checksum doesn't match!")
             #else:
-            elif not packet_lost:
-                #if lost_seq_num
+            if seq_num == exp_seq_num:
                 print (seq_num)
                 ack_seq = int(seq_num)+1
                 print("ACK "+ str(ack_seq))
                 send_ack(ack_seq)
+                print_message.append(seq_num)
                 with open(output_file, 'ab') as file:
                     file.write(message)
-            else:
-                print("print meeeeeeeee")
-                print("Seq_num: ", seq_num)
-                print("lost_seq_num: ", lost_seq_num)
-                if packet_lost and (seq_num == min(lost_seq_num)):
-                    print("my_ack--------")
-                    ack_seq = int(seq_num)+1
-                    print("ACK "+ str(ack_seq))
-                    send_ack(ack_seq)
-                    lost_seq_num.remove(seq_num)
-                    with open(output_file, 'ab') as file:
-                        file.write(message)
-                    if len(lost_seq_num) < 1:
-                        packet_lost = False
-                else:
-                    pass
+                exp_seq_num += 1
+
+        #     elif not packet_lost:
+        #         #if lost_seq_num
+        #         print (seq_num)
+        #         ack_seq = int(seq_num)+1
+        #         print("ACK "+ str(ack_seq))
+        #         send_ack(ack_seq)
+        #         print_message.append(seq_num)
+        #         with open(output_file, 'ab') as file:
+        #             file.write(message)
+        #     else:
+        #         print("print meeeeeeeee")
+        #         print("Seq_num: ", seq_num)
+        #         print("lost_seq_num: ", lost_seq_num)
+        #         if packet_lost and (seq_num == min(lost_seq_num)):
+        #             print("my_ack--------")
+        #             ack_seq = int(seq_num)+1
+        #             print("ACK "+ str(ack_seq))
+        #             send_ack(ack_seq)
+        #             lost_seq_num.remove(seq_num)
+        #             print_message.append(seq_num)
+        #             with open(output_file, 'ab') as file:
+        #                 file.write(message)
+        #             if len(lost_seq_num) < 1:
+        #                 packet_lost = False
+        #         else:
+        #             print("I don't this lost:"+str(packet_lost))
+        #             print("I don't this seq_num"+str(seq_num))
+        #             print("I don't this lost_seq_num",lost_seq_num)
+        #             pass
+        if str(ack_seq) == "1455":
+            for element in print_message:
+                print(print_message[element])
 
         #print('Sequence number:', seq_num, '\nChecksum:', checksum, '\nData type:', bin(data_type), '\nMessage:', message)
 
