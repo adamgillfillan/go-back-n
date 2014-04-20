@@ -74,8 +74,9 @@ def main():
 
         data, addr = s.recvfrom(1000000)
         data = pickle.loads(data)
-        print("Data: ", data)
+
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
+        print("Data: ", str(message))
         rand_loss = random.random()
         if rand_loss <= prob_loss:
             print("Packet loss, sequence number = ", seq_num)

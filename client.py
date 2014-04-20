@@ -100,12 +100,17 @@ def timer(s,f):
     global ACK
     #t = threading.Timer(RTT, timer)
     #t.start()
+    print ("Timer AAAAA")
     resent_index = window_low  # resent from window_low to window_high
     if ACK == window_low:
+        print ("Timer BBBB")
         lock.acquire()
+        print ("Timer CC")
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
             print ("resent "+ str(resent_index))
+            signal.alarm(0)
+            signal.alarm(int(RTT))
             socket_function(pkts[resent_index])
             resent_index += 1
         lock.release()
@@ -195,11 +200,14 @@ def ack_listen_thread(sock, host, port):
             #print (ACK)
             if ACK: #and ACK >= int(N):  # if ACK != null. Foo
                 #print("hello"+str(ACK))
-                signal.alarm(0)
+                # if ACK
                 lock.acquire()
-                if ACK > window_low and ACK <total_pkts:
+                if ACK >= window_low and ACK <total_pkts:
+                    signal.alarm(0)
+                    signal.alarm(int(RTT))
                     #print(window_low)
                     temp_pckts_acked = ACK - window_low
+                    old_window_high = window_high
                     window_high = min(window_high + ACK - window_low, total_pkts-1)
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
@@ -207,36 +215,48 @@ def ack_listen_thread(sock, host, port):
                     print("Wind_low "+str(window_low))
                     print("WInd_high"+str(window_high))
                     print("num_pkts_sent "+str(num_pkts_sent))
-                    if window_high <= total_pkts and int(total_pkts-ACK)>=int(N):  # Still have packages to be sent. Foo
-                        print("state A")
-                        for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
-                            #sock.sendto(pkts[8], (host, port))
-                            signal.alarm(int(RTT))
-                            socket_function(pkts[num_pkts_sent])
-                            print("pakage "+str(num_pkts_sent)+"sent")
-                            print ("state B")
-                            #print( pkts[num_pkts_sent])
-                            if num_pkts_sent < total_pkts-1:
+                    for i in range(int(window_high-old_window_high)):
+                        socket_function(pkts[num_pkts_sent])
+                        print("pakage "+str(num_pkts_sent)+"sent")
+                        if num_pkts_sent < total_pkts-1:
                                 num_pkts_sent += 1
 
-                    elif ACK < total_pkts: # for the last windows.
-                         print("state1")
-                         while num_pkts_sent <total_pkts: # check how many pkts left to sent. Foo
-                                #sock.sendto(pkts[8], (host, port))
-                                print("state2")
-                                signal.alarm(int(RTT))
-                                socket_function(pkts[num_pkts_sent])
-                                print("pakage "+str(num_pkts_sent)+"sent")
-                                #print( pkts[num_pkts_sent])
-                                # if num_pkts_sent < total_pkts-1:
-                                #     print("state3")
-                                num_pkts_sent += 1
-                            # continue  # for the last windows.
-
-                    elif ACK == total_pkts:
-                        print("Done!")
-                        done_transmitting = 1
-                        exit()
+                elif ACK == total_pkts:
+                    print("Done!")
+                    done_transmitting = 1
+                    exit()
+                #
+                #
+                #
+                #     if window_high <= total_pkts and int(total_pkts-ACK)>=int(N):  # Still have packages to be sent. Foo
+                #         print("state A")
+                #         for i in range(min(temp_pckts_acked, total_pkts - window_high)): # check how many pkts left to sent. Foo
+                #             #sock.sendto(pkts[8], (host, port))
+                #             signal.alarm(int(RTT))
+                #             socket_function(pkts[num_pkts_sent])
+                #             print("pakage "+str(num_pkts_sent)+"sent")
+                #             print ("state B")
+                #             #print( pkts[num_pkts_sent])
+                #             if num_pkts_sent < total_pkts-1:
+                #                 num_pkts_sent += 1
+                # elif ACK < total_pkts: # for the last windows.
+                #      print("state1")
+                #      while num_pkts_sent <total_pkts: # check how many pkts left to sent. Foo
+                #             #sock.sendto(pkts[8], (host, port))
+                #             print("state2")
+                #             signal.alarm(int(RTT))
+                #             socket_function(pkts[num_pkts_sent])
+                #             print("pakage "+str(num_pkts_sent)+"sent")
+                #             #print( pkts[num_pkts_sent])
+                #             if num_pkts_sent < total_pkts-1:
+                #                 print("state3")
+                #                 num_pkts_sent += 1
+                #         # continue  # for the last windows.
+                #
+                # elif ACK == total_pkts:
+                #     print("Done!")
+                #     done_transmitting = 1
+                #     exit()
                 lock.release()
 
 
