@@ -52,16 +52,17 @@ def carry_checksum_addition(num_1, num_2):
 
 # Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
+   # print (message)
     # if (len(message) % 2) != 0:
     #     message += bytes("0")
-    #
-    # checksum = 0
-    # for i in range(0, len(message), 2):
-    #     my_message = str(message)
-    #     w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
-    #     checksum = carry_checksum_addition(checksum, w)
-    # #return (not checksum) & 0xfff
-    return 0
+
+    checksum = 0
+    for i in range(0, len(message), 2):
+        my_message = str(message)
+        w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
+        checksum = carry_checksum_addition(checksum, w)
+    return (not checksum) & 0xfff
+
 
 
 def pack_data(message, seq_num):
@@ -300,8 +301,8 @@ def main():
     # comment this block when ready for command line argument
    # N = input("Please enter window size N:>")
    # MSS = input("Please enter MSS in Bytes:>")
-    N = 64
-    MSS = 500
+    N = 1
+    MSS = 1000
     host = socket.gethostname()  # Get local machine name
     print("Host:", host)
     port = 7735  # Reserve a port for your service.
