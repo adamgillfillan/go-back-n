@@ -8,6 +8,10 @@ import inspect
 import time
 import signal
 
+#python server.py
+# python client.py
+
+
 DATA_TYPE = 0b101010101010101
 DATA_SIZE = 64   #need to be modified
 
@@ -16,7 +20,6 @@ ack_pkt = namedtuple('ack_pkt', 'seq_num zero_field data_type')
 N = 0  # window size
 MSS = 0 # maximum segment size
 ACK = 0 # ACK received from server.
-host = 0
 num_pkts_sent = 0
 num_pkts_acked = 0
 seq_num = 0
@@ -28,10 +31,8 @@ total_pkts = 0
 RTT = 0.1
 pkts = []
 done_transmitting = 0
-# def timer():
-#     pass
-# t = threading.Thread(RTT, timer)
-#global threading_first_window
+starttime = 0
+stoptime= 0
 
 
 
@@ -51,18 +52,20 @@ def carry_checksum_addition(num_1, num_2):
 
 # Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
-    if (len(message) % 2) != 0:
-        message += bytes("0")
-
-    checksum = 0
-    for i in range(0, len(message), 2):
-        my_message = str(message)
-        w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
-        checksum = carry_checksum_addition(checksum, w)
-    return (not checksum) & 0xffff
+    # if (len(message) % 2) != 0:
+    #     message += bytes("0")
+    #
+    # checksum = 0
+    # for i in range(0, len(message), 2):
+    #     my_message = str(message)
+    #     w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
+    #     checksum = carry_checksum_addition(checksum, w)
+    # #return (not checksum) & 0xfff
+    return 0
 
 
 def pack_data(message, seq_num):
+    #pkt = data_pkt(seq_num, calculate_checksum(message), DATA_TYPE, message)
     pkt = data_pkt(seq_num, calculate_checksum(message), DATA_TYPE, message)
     #packed_pkt = pack('ihh' + str(DATA_SIZE) + 's', pkt.seq_num, pkt.checksum, pkt.data_type, bytes(pkt.data,'utf-8'))
     my_list = [pkt.seq_num, pkt.checksum, pkt.data_type, pkt.data]
@@ -85,11 +88,10 @@ def socket_function(pkts):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
 
     # comment this block when ready for command line argument
-    #N = input("Please enter window size N:>")
-    #MSS = input("Please enter MSS in Bytes:>")
-    #host = socket.gethostname()  # Get local machine name
+    # N = input("Please enter window size N:>")
+    # MSS = input("Please enter MSS in Bytes:>")
+    host = socket.gethostname()  # Get local machine name
     # print("Host:", host)
-    global host
     port = 7735  # Reserve a port for your service.
     s.sendto(pkts, (host, port))
     s.close()
@@ -102,15 +104,15 @@ def timer(s,f):
     global ACK
     #t = threading.Timer(RTT, timer)
     #t.start()
-    print ("Timer AAAAA")
+    #print ("Timer AAAAA")
     resent_index = window_low  # resent from window_low to window_high
     if ACK == window_low:
-        print ("Timer BBBB")
+        print ("Timeout sequence number ="+ str(ACK))
         lock.acquire()
-        print ("Timer CC")
+       # print ("Timer CC")
         # print ("resent begin")
         while resent_index <= window_high and resent_index < total_pkts:
-            print ("resent "+ str(resent_index))
+           # print ("resent "+ str(resent_index))
             # signal.alarm(0)
             # signal.alarm(int(RTT))
             signal.alarm(0)
@@ -142,9 +144,9 @@ def send_file(file_content, sock, hostname, port):
        # socket_function(pkts[num_pkts_sent], sock, hostname, port)
         #t = threading.Timer(RTT,socket_function("hello"))
         if ACK == 0:
-            print ("num_pkts_sent"+ str(num_pkts_sent))
+            #print ("num_pkts_sent"+ str(num_pkts_sent))
             socket_function(pkts[num_pkts_sent])
-            print("pakage "+str(num_pkts_sent)+"sent from first")
+            #print("pakage "+str(num_pkts_sent)+"sent from first")
             #print(pkts[num_pkts_sent])
             num_pkts_sent += 1
         else:
@@ -189,16 +191,17 @@ def ack_listen_thread(sock, host, port):
     global total_pkts
     global ACK
     global done_transmitting
+    global stoptime
     done_transmitting = 0
     #global threading_first_window
     while True:
         #threading_first_window.stop()
         data = pickle.loads(ack_socket.recv(256))
-        print("ACK "+str(data[0]))
+       # print("ACK "+str(data[0]))
         # print("Wind_low "+str(window_low))
         # print("WInd_high"+str(window_high))
         # print("num_pkts_sent "+str(num_pkts_sent))
-        print("total"+str(total_pkts))
+        #print("total"+str(total_pkts))
         # print("sent"+str(num_pkts_sent))
         if data[2]=="1010101010101010":  # data[2] is ACK identifier data[0] should be ACK sequence number. Foo
             ACK = data[0]
@@ -218,18 +221,20 @@ def ack_listen_thread(sock, host, port):
                     window_low = ACK
                     num_pkts_acked += temp_pckts_acked  # Acked # of packages. Foo
                     #print("ACK "+str(data[0]))
-                    print("Wind_low "+str(window_low))
-                    print("WInd_high"+str(window_high))
-                    print("num_pkts_sent "+str(num_pkts_sent))
+                   # print("Wind_low "+str(window_low))
+                    #print("WInd_high"+str(window_high))
+                    #print("num_pkts_sent "+str(num_pkts_sent))
                     for i in range(int(window_high-old_window_high)):
                         socket_function(pkts[num_pkts_sent])
-                        print("pakage "+str(num_pkts_sent)+"sent")
+                        #print("pakage "+str(num_pkts_sent)+"sent")
                         if num_pkts_sent < total_pkts-1:
                                 num_pkts_sent += 1
 
                 elif ACK == total_pkts:
                     print("Done!")
                     done_transmitting = 1
+                    stoptime = time.time()
+                    print(str(stoptime-starttime))
                     exit()
                 #
                 #
@@ -285,19 +290,22 @@ def parse_command_line_arguments():
 def main():
     global N
     global MSS
-    global host
+    global starttime
+    starttime = time.time()
     # Uncomment this when ready for command line argument
-    host, port, my_test_file, N, MSS = parse_command_line_arguments()
+    #host, port, my_test_file, N, MSS = parse_command_line_arguments()
     #adam's host = lil_boss
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
 
     # comment this block when ready for command line argument
-    #N = input("Please enter window size N:>")
-    #MSS = input("Please enter MSS in Bytes:>")
-    #host = socket.gethostname()  # Get local machine name
+   # N = input("Please enter window size N:>")
+   # MSS = input("Please enter MSS in Bytes:>")
+    N = 64
+    MSS = 500
+    host = socket.gethostname()  # Get local machine name
     print("Host:", host)
-    #port = 7735  # Reserve a port for your service.
-    #my_test_file = 'test.pdf'
+    port = 7735  # Reserve a port for your service.
+    my_test_file = 'test.pdf'
     # finish comment here
 
     global window_high
@@ -330,4 +338,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

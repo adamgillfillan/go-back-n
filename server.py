@@ -38,15 +38,17 @@ def carry_checksum_addition(num_1, num_2):
 
 # Calculate the checksum of the data only. Return True or False
 def calculate_checksum(message):
-    if (len(message) % 2) != 0:
-        message += bytes("0")
+    # if (len(message) % 2) != 0:
+    #     message += bytes("0")
+    #
+    # checksum = 0
+    # for i in range(0, len(message), 2):
+    #     my_message = str(message)
+    #     w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
+    #     checksum = carry_checksum_addition(checksum, w)
+    # return (not checksum) & 0xffff
+    return 0
 
-    checksum = 0
-    for i in range(0, len(message), 2):
-        my_message = str(message)
-        w = ord(my_message[i]) + (ord(my_message[i+1]) << 8)
-        checksum = carry_checksum_addition(checksum, w)
-    return (not checksum) & 0xffff
 
 
 def parse_command_line_arguments():
@@ -63,7 +65,7 @@ def main():
     host = socket.gethostname()  # Get local machine name
     port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.1
+    prob_loss = 0.07
     #dt = str(datetime.time().second)
     #d = random.randrange(0, 1000000)
     timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -78,7 +80,7 @@ def main():
         data = pickle.loads(data)
 
         seq_num, checksum, data_type, message = data[0], data[1], data[2], data[3]
-        print("Data: ", str(message))
+        #print("Data: ", str(message))
         rand_loss = random.random()
 
         if rand_loss <= prob_loss:
@@ -94,9 +96,9 @@ def main():
                 print("Packet dropped, checksum doesn't match!")
             #else:
             if seq_num == exp_seq_num:
-                print (seq_num)
+               # print (seq_num)
                 ack_seq = int(seq_num)+1
-                print("ACK "+ str(ack_seq))
+               # print("ACK "+ str(ack_seq))
                 send_ack(ack_seq)
                 print_message.append(seq_num)
                 with open(output_file, 'ab') as file:
