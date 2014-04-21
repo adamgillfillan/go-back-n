@@ -59,16 +59,16 @@ def parse_command_line_arguments():
 
 
 def main():
-    #port, output_file, prob_loss = parse_command_line_arguments()
+    port, output_file, prob_loss = parse_command_line_arguments()
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)         # Create a socket object
     host = socket.gethostname()  # Get local machine name
-    port = 7735                 # Reserve a port for your service.
+    #port = 7735                 # Reserve a port for your service.
     s.bind((host, port))         # Bind to the port
-    prob_loss = 0.01
+    #prob_loss = 0.01
     #dt = str(datetime.time().second)
     #d = random.randrange(0, 1000000)
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    output_file = 'file_'+str(timestr)+'.pdf'
+    #output_file = 'file_'+str(timestr)+'.pdf'
     lost_seq_num = []
     print_message = []
     packet_lost = False

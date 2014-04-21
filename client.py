@@ -235,7 +235,7 @@ def ack_listen_thread(sock, host, port):
                     print("Done!")
                     done_transmitting = 1
                     stoptime = time.time()
-                    print(str(stoptime-starttime))
+                    print("Running Time:",str(stoptime-starttime))
                     exit()
                 #
                 #
@@ -294,19 +294,19 @@ def main():
     global starttime
     starttime = time.time()
     # Uncomment this when ready for command line argument
-    #host, port, my_test_file, N, MSS = parse_command_line_arguments()
+    host, port, my_test_file, N, MSS = parse_command_line_arguments()
     #adam's host = lil_boss
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a socket object
 
     # comment this block when ready for command line argument
    # N = input("Please enter window size N:>")
    # MSS = input("Please enter MSS in Bytes:>")
-    N = 1
-    MSS = 1000
-    host = socket.gethostname()  # Get local machine name
+    #N = 1
+    #MSS = 1000
+    #host = socket.gethostname()  # Get local machine name
     print("Host:", host)
     port = 7735  # Reserve a port for your service.
-    my_test_file = 'test.pdf'
+    #my_test_file = 'test.pdf'
     # finish comment here
 
     global window_high
